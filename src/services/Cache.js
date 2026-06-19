@@ -3,6 +3,8 @@
  * This service provides a simple in-memory cache implementation
  * for storing and retrieving key-value pairs.
  */
+import { randomUUID } from "node:crypto";
+
 export class Cache {
   /**
    * Constructor for the Cache service.
@@ -30,10 +32,10 @@ export class Cache {
   /**
    * Create a new key with associated data.
    * @param data {unknown} - The data to associate with the new key
-   * @param key {string} - Optional custom key; if not provided, a timestamp will be used
+   * @param key {string} - Optional custom key; if not provided, a UUID will be used
    * @returns {string} - A unique identifier for the created cache entry
    */
-  create(data, key = Date.now().toString()) {
+  create(data, key = randomUUID()) {
     this.log(`Creating key: ${key}`, data);
 
     if (this.cache.has(key)) {
