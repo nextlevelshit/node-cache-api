@@ -1,14 +1,14 @@
-import { Router } from "express";
+import { Router, type Request, type Response } from "express";
+import type { Cache } from "../services/Cache.js";
 
 /**
  * Creates API routes for managing cache entries.
- * @param cache {typeof import("../services/Cache.js").Cache} - An instance of the Cache service
- * @returns {typeof Router}
+ * @param cache - An instance of the Cache service
  */
-export function createApiRoutes(cache) {
+export function createApiRoutes(cache: Cache): Router {
   const router = Router();
 
-  router.get("/", (req, res) => {
+  router.get("/", (req: Request, res: Response) => {
     try {
       const keys = cache.keys;
       res.json({ keys });
@@ -18,18 +18,18 @@ export function createApiRoutes(cache) {
     }
   });
 
-  router.get("/:key", (req, res) => {
+  router.get("/:key", (req: Request, res: Response) => {
     try {
       const key = req.params.key;
       const data = cache.get(key);
       res.json(data);
     } catch (e) {
-      console.error(e.message);
+      console.error(e instanceof Error ? e.message : e);
       res.sendStatus(404);
     }
   });
 
-  router.post("/", (req, res) => {
+  router.post("/", (req: Request, res: Response) => {
     try {
       const data = req.body;
       const key = cache.create(data);
@@ -40,7 +40,7 @@ export function createApiRoutes(cache) {
     }
   });
 
-  router.put("/:key", (req, res) => {
+  router.put("/:key", (req: Request, res: Response) => {
     try {
       const key = req.params.key;
       const data = req.body;
@@ -58,17 +58,17 @@ export function createApiRoutes(cache) {
     }
   });
 
-  router.delete("/:key", (req, res) => {
+  router.delete("/:key", (req: Request, res: Response) => {
     try {
       cache.remove(req.params.key);
       res.sendStatus(204);
     } catch (e) {
-      console.error(e.message);
+      console.error(e instanceof Error ? e.message : e);
       res.status(404).json({ error: "Key not found" });
     }
   });
 
-  router.delete("/", (req, res) => {
+  router.delete("/", (req: Request, res: Response) => {
     try {
       cache.clear();
       res.sendStatus(204);

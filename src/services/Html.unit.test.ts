@@ -1,11 +1,11 @@
 import { describe, test, expect, beforeEach, afterEach, vi } from "vitest";
 import { Html } from "./Html.js";
-import { writeFileSync, unlinkSync, mkdirSync, rmSync } from "fs";
+import { writeFileSync, mkdirSync, rmSync } from "fs";
 import { join } from "path";
 
 describe("Html - Unit Tests", () => {
-  let html;
-  let testDir;
+  let html: Html;
+  let testDir: string;
 
   beforeEach(() => {
     testDir = join(process.cwd(), "test-templates");
@@ -92,19 +92,24 @@ describe("Html - Unit Tests", () => {
     test("throws on empty template path", () => {
       expect(() => html.render("", {})).toThrow("Template path is required");
 
-      expect(() => html.render(null, {})).toThrow("Template path is required");
+      expect(() => html.render(null as unknown as string, {})).toThrow(
+        "Template path is required",
+      );
     });
 
     test("throws on invalid replacements", () => {
       writeFileSync(join(testDir, "test.html"), "{{test}}");
 
-      expect(() => html.render("test.html", null)).toThrow(
-        "Replacements must be an object",
-      );
+      expect(() =>
+        html.render("test.html", null as unknown as Record<string, unknown>),
+      ).toThrow("Replacements must be an object");
 
-      expect(() => html.render("test.html", "string")).toThrow(
-        "Replacements must be an object",
-      );
+      expect(() =>
+        html.render(
+          "test.html",
+          "string" as unknown as Record<string, unknown>,
+        ),
+      ).toThrow("Replacements must be an object");
     });
 
     test("throws on empty template content", () => {

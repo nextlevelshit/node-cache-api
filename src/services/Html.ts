@@ -6,24 +6,33 @@ import { readFileSync } from "fs";
  * HTML Template Service
  * Simple template rendering with {{key}} placeholder replacement.
  */
+
+export interface HtmlOptions {
+  /** Enable debug logging (default: false) */
+  debug?: boolean;
+  /** Base path for template files (default: current directory) */
+  basePath?: string | null;
+}
+
 export class Html {
-  /**
-   * @param {Object} options - Configuration options
-   * @param {boolean} options.debug - Enable debug logging (default: false)
-   * @param {string} options.basePath - Base path for template files (default: current directory)
-   */
-  constructor(options = { debug: false, basePath: null }) {
+  options: HtmlOptions;
+  basePath: string;
+
+  constructor(options: HtmlOptions = { debug: false, basePath: null }) {
     this.options = options;
     this.basePath = options.basePath || dirname(fileURLToPath(import.meta.url));
   }
 
   /**
    * Render a template with replacements
-   * @param {string} templatePath - Path to template file (Note: relative to basePath or absolute to current directory)
-   * @param {Object} replacements - Key-value pairs for placeholder replacement
-   * @returns {string} - Rendered HTML string
+   * @param templatePath - Path to template file (Note: relative to basePath or absolute to current directory)
+   * @param replacements - Key-value pairs for placeholder replacement
+   * @returns Rendered HTML string
    */
-  render(templatePath, replacements = {}) {
+  render(
+    templatePath: string,
+    replacements: Record<string, unknown> = {},
+  ): string {
     if (!templatePath) {
       throw new Error("Template path is required");
     }
@@ -34,28 +43,27 @@ export class Html {
 
   /**
    * Read template file from disk
-   * @param {string} filePath - Path to template file
-   * @returns {string} - Template content
+   * @param filePath - Path to template file
+   * @returns Template content
    */
-  readFile(filePath) {
+  readFile(filePath: string): string {
     const fullPath = join(this.basePath, filePath);
 
     try {
       return readFileSync(fullPath, "utf8");
     } catch (error) {
-      throw new Error(
-        `Failed to read template file: ${filePath} - ${error.message}`,
-      );
+      const message = error instanceof Error ? error.message : String(error);
+      throw new Error(`Failed to read template file: ${filePath} - ${message}`);
     }
   }
 
   /**
    * Replace placeholders in template with values
-   * @param {string} template - Template string with {{key}} placeholders
-   * @param {Object} replacements - Replacement values
-   * @returns {string} - Processed template
+   * @param template - Template string with {{key}} placeholders
+   * @param replacements - Replacement values
+   * @returns Processed template
    */
-  replace(template, replacements) {
+  replace(template: string, replacements: Record<string, unknown>): string {
     if (!template) {
       throw new Error("Template content is required");
     }
@@ -83,18 +91,18 @@ export class Html {
 
   /**
    * Escape special regex characters in replacement keys
-   * @param {string} string - String to escape
-   * @returns {string} - Escaped string
+   * @param string - String to escape
+   * @returns Escaped string
    */
-  escapeRegex(string) {
+  escapeRegex(string: string): string {
     return string.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
   }
 
   /**
    * Log debug messages
-   * @param {string} message - Message to log
+   * @param message - Message to log
    */
-  log(message) {
+  log(message: string): void {
     if (this.options.debug) {
       console.log(`[Html] ${message}`);
     }

@@ -2,10 +2,11 @@ import { describe, test, expect, beforeEach, vi } from "vitest";
 import request from "supertest";
 import { Cache } from "./services/Cache.js";
 import { createApp } from "./app.js";
+import type { Express } from "express";
 
 describe("App Integration Tests", () => {
-  let app;
-  let cache;
+  let app: Express;
+  let cache: Cache;
 
   beforeEach(() => {
     cache = new Cache({ debug: false });
@@ -89,7 +90,7 @@ describe("App Integration Tests", () => {
       const responses = await Promise.all(operations);
 
       // All should succeed
-      responses.forEach((response, index) => {
+      responses.forEach((response) => {
         expect(response.status).toBe(201);
         expect(response.body.key).toBeTruthy();
       });

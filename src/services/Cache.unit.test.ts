@@ -2,7 +2,7 @@ import { describe, test, expect, beforeEach, vi } from "vitest";
 import { Cache } from "./Cache.js";
 
 describe("Cache - Unit Tests", () => {
-  let cache;
+  let cache: Cache;
 
   beforeEach(() => {
     cache = new Cache({ debug: false });

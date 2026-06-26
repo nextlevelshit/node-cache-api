@@ -3,37 +3,49 @@
  * This service provides a simple in-memory cache implementation
  * for storing and retrieving key-value pairs.
  */
+
+export interface CacheOptions {
+  override?: boolean;
+  debug?: boolean;
+}
+
+export type CacheValue = Record<string, unknown>;
+
 export class Cache {
+  options: CacheOptions;
+  cache: Map<string, CacheValue>;
+
   /**
    * Constructor for the Cache service.
-   * @param options {{override?: boolean, debug?: boolean}} - Configuration options for the cache
+   * @param options - Configuration options for the cache
    */
-  constructor(options = { override: false, debug: true }) {
+  constructor(options: CacheOptions = { override: false, debug: true }) {
     this.options = options;
     this.cache = new Map();
   }
 
   /**
    * Retrieve the value associated with a given key.
-   * @param key {string} - The key to look up in the cache
-   * @returns {unknown} - The value associated with the key
+   * @param key - The key to look up in the cache
+   * @returns The value associated with the key
    * @throws {Error} If the key does not exist in the cache
    */
-  get(key) {
-    if (!this.cache.has(key)) {
+  get(key: string): CacheValue {
+    const value = this.cache.get(key);
+    if (value === undefined && !this.cache.has(key)) {
       throw new Error("Key not found");
     }
 
-    return this.cache.get(key);
+    return value as CacheValue;
   }
 
   /**
    * Create a new key with associated data.
-   * @param data {unknown} - The data to associate with the new key
-   * @param key {string} - Optional custom key; if not provided, a timestamp will be used
-   * @returns {string} - A unique identifier for the created cache entry
+   * @param data - The data to associate with the new key
+   * @param key - Optional custom key; if not provided, a timestamp will be used
+   * @returns A unique identifier for the created cache entry
    */
-  create(data, key = Date.now().toString()) {
+  create(data: CacheValue, key: string = Date.now().toString()): string {
     this.log(`Creating key: ${key}`, data);
 
     if (this.cache.has(key)) {
@@ -60,11 +72,11 @@ export class Cache {
 
   /**
    * Update an existing key with new data.
-   * @param key {string} - The key to update
-   * @param data {unknown} - The new data to associate with the key
-   * @returns {{key: string, data: unknown}} - An object containing the key and updated data
+   * @param key - The key to update
+   * @param data - The new data to associate with the key
+   * @returns An object containing the key and updated data
    */
-  update(key, data) {
+  update(key: string, data: CacheValue): { key: string; data: CacheValue } {
     if (!this.cache.has(key)) {
       throw new Error("Key not found");
     }
@@ -82,10 +94,10 @@ export class Cache {
 
   /**
    * Remove a key and its associated data from the cache.
-   * @param key {string} - The key to remove
+   * @param key - The key to remove
    * @throws {Error} If the key does not exist in the cache
    */
-  remove(key) {
+  remove(key: string): void {
     if (!this.cache.delete(key)) {
       throw new Error("Key not found");
     }
@@ -93,24 +105,24 @@ export class Cache {
 
   /**
    * Retrieve all keys currently stored in the cache.
-   * @returns {string[]} - An array of all keys in the cache
+   * @returns An array of all keys in the cache
    */
-  get keys() {
+  get keys(): string[] {
     return Array.from(this.cache.keys()); // Eqivalent to [...this.cache.keys()]
   }
 
   /**
    * Retrieve all values currently stored in the cache.
-   * @returns {unknown[]} - An array of all values in the cache
+   * @returns An array of all values in the cache
    */
-  get values() {
+  get values(): CacheValue[] {
     return Array.from(this.cache.values()); // Equivalent to [...this.cache.values()]
   }
 
   /**
    * Clear the entire cache.
    */
-  clear() {
+  clear(): void {
     this.cache.clear();
     this.log("Cache cleared");
   }
@@ -120,7 +132,7 @@ export class Cache {
    * @param message - The message to log
    * @param data - Additional arguments to log
    */
-  log(message, data) {
+  log(message: string, data?: unknown): void {
     if (this.options.debug) {
       if (data) {
         console.log(`[Cache] ${message}`, data);
@@ -134,7 +146,7 @@ export class Cache {
    * Log a message as a table.
    * @param message
    */
-  logTable(message) {
+  logTable(message: unknown): void {
     if (this.options.debug) {
       console.table(message);
     }

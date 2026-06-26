@@ -18,7 +18,7 @@ export default defineConfig({
         "src/config/",
         "**/*.config.{js,ts,mjs}",
         "**/*.test.{js,ts}",
-        "**/index.js", // Main entry point
+        "**/index.ts", // Main entry point
       ],
     },
 

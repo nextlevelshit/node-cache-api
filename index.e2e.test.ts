@@ -1,5 +1,5 @@
 import { beforeAll, afterAll, describe, test, expect } from "vitest";
-import { createServer } from "node:http";
+import { createServer, type Server } from "node:http";
 import { Cache } from "./src/services/Cache.js";
 import { createApp } from "./src/app.js";
 
@@ -7,37 +7,32 @@ const TEST_PORT = 1313;
 const baseUrl = `http://localhost:${TEST_PORT}`;
 
 describe("E2E Tests - Real Server", () => {
-  let server;
-  let app;
-  let cache;
+  let server: Server;
 
   beforeAll(async () => {
     // Create app instance for testing
-    cache = new Cache({ debug: false });
-    app = createApp(cache, { port: TEST_PORT });
+    const cache = new Cache({ debug: false });
+    const app = createApp(cache, { port: TEST_PORT });
 
     // Start server
     server = createServer(app);
 
-    await new Promise((resolve, reject) => {
+    await new Promise<void>((resolve, reject) => {
       const timeout = setTimeout(() => {
         reject(new Error("Server startup timeout"));
       }, 10000);
 
-      server.listen(TEST_PORT, (err) => {
+      server.listen(TEST_PORT, () => {
         clearTimeout(timeout);
-        if (err) reject(err);
-        else {
-          resolve();
-        }
+        resolve();
       });
     });
   });
 
   afterAll(async () => {
     if (server) {
-      await new Promise((resolve) => {
-        server.close(resolve);
+      await new Promise<void>((resolve) => {
+        server.close(() => resolve());
       });
     }
   });
@@ -56,13 +51,13 @@ describe("E2E Tests - Real Server", () => {
       });
 
       expect(createResponse.status).toBe(201);
-      const { key } = await createResponse.json();
+      const { key } = (await createResponse.json()) as { key: string };
 
       // Retrieve it
       const getResponse = await fetch(`${baseUrl}/api/${key}`);
       expect(getResponse.status).toBe(200);
 
-      const data = await getResponse.json();
+      const data = (await getResponse.json()) as Record<string, unknown>;
       expect(data.message).toBe("e2e test data");
       expect(data.userAgent).toBe("test-suite");
 
@@ -77,7 +72,9 @@ describe("E2E Tests - Real Server", () => {
       });
 
       expect(updateResponse.status).toBe(200);
-      const updateResult = await updateResponse.json();
+      const updateResult = (await updateResponse.json()) as {
+        data: Record<string, unknown>;
+      };
       expect(updateResult.data.message).toBe("updated via e2e");
       expect(updateResult.data.processed).toBe(true);
       expect(updateResult.data.userAgent).toBe("test-suite");
@@ -123,14 +120,14 @@ describe("E2E Tests - Real Server", () => {
 
       // Get all keys
       const keysResponse = await fetch(`${baseUrl}/api`);
-      const { keys } = await keysResponse.json();
+      const { keys } = (await keysResponse.json()) as { keys: string[] };
 
       expect(keys.length).toBeGreaterThanOrEqual(20);
 
       // Verify data integrity by retrieving each
       const retrievalPromises = keys
         .slice(0, 10)
-        .map((key) => fetch(`${baseUrl}/api/${key}`));
+        .map((key: string) => fetch(`${baseUrl}/api/${key}`));
 
       const retrievals = await Promise.all(retrievalPromises);
 

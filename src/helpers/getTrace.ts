@@ -2,13 +2,21 @@ import { relative } from "path";
 
 const cwd = process.cwd();
 
+export interface Trace {
+  relativePath: string;
+  lineNumber: number;
+}
+
 /**
  * Trace the caller of this function and return the relative path and line number.
- * @returns {{relativePath: string, lineNumber: number}}
  */
-export const getTrace = () => {
+export const getTrace = (): Trace => {
   // Use a custom Error to capture the stack trace
   const stack = new Error().stack;
+
+  if (!stack) {
+    throw new Error("Could not capture stack trace");
+  }
 
   // Parse the stack trace string (more reliable than prepareStackTrace shenanigans)
   const stackLines = stack.split("\n");

@@ -1,6 +1,8 @@
 # Node.js ExpressJS API (Caching Service)
 
-A modern, minimal Node.js REST API built with ES modules, Express 5, and comprehensive testing via Vitest. Perfect for teaching contemporary web development patterns and testing strategies.
+A modern, minimal Node.js REST API built with TypeScript, ES modules, Express 5, and comprehensive testing via Vitest. Perfect for teaching contemporary web development patterns and testing strategies.
+
+> Runs directly from TypeScript source via [`tsx`](https://github.com/privatenumber/tsx) — no build step needed for development. `npm run typecheck` runs `tsc --noEmit`; `npm run build` emits JS to `dist/`.
 
 ## TL;DR
 
@@ -14,22 +16,28 @@ npm start
 
 This isn't your typical Express boilerplate. We're running:
 
+- **TypeScript** with strict mode and NodeNext module resolution
 - **Express 5.x** with ES modules (no more `require()` nonsense)
 - **In-memory cache service** for blazing-fast data operations
 - **Four-tier testing strategy** with static analysis, unit, integration, and E2E coverage
 - **Zero dependencies** for core functionality (Express + testing tools only)
-- **Modern JavaScript** patterns throughout
+- **Modern, fully typed** patterns throughout
 - **Proper error handling** and HTTP status codes
 
 ## Architecture
 
 ```
 src/
-├── app.js                # Express app factory
+├── app.ts                # Express app factory
+├── config/
+│   └── constants.ts     # Environment-derived config
+├── helpers/
+│   └── getTrace.ts      # Stack-trace caller tracing
 ├── routes/
-│   └── api.js            # RESTful API endpoints
+│   └── api.ts           # RESTful API endpoints
 └── services/
-    └── Cache.js          # In-memory key-value store
+    ├── Cache.ts         # In-memory key-value store
+    └── Html.ts          # Template rendering
 ```
 
 The cache service handles all CRUD operations with optional debug logging and override capabilities. API routes provide a clean REST interface over HTTP.
@@ -103,7 +111,7 @@ npm run lint
 **When to run:** Constantly during development
 
 ```javascript
-// From Cache.unit.test.js
+// From Cache.unit.test.ts
 test("creates and retrieves data with custom key", () => {
   const cache = new Cache();
   const testData = { user: "wolfgang", city: "stuttgart" };
@@ -129,7 +137,7 @@ test("creates and retrieves data with custom key", () => {
 **When to run:** Before commits
 
 ```javascript
-// From app.integration.test.js
+// From app.integration.test.ts
 import request from "supertest"; // ← Key difference: supertest, not fetch
 import { createApp } from "./app.js";
 
@@ -166,7 +174,7 @@ test("full CRUD lifecycle with real cache", async () => {
 **When to run:** Before deployments
 
 ```javascript
-// From index.e2e.test.js
+// From index.e2e.test.ts
 beforeAll(async () => {
   // Start actual server on real port
   server = createServer(app);

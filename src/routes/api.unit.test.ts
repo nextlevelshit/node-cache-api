@@ -1,11 +1,20 @@
 import { describe, test, expect, beforeEach, vi } from "vitest";
 import { createApiRoutes } from "./api.js";
-import express from "express";
+import type { Cache } from "../services/Cache.js";
+import express, { type Express } from "express";
 import request from "supertest";
 
 describe("API Routes - Unit Tests", () => {
-  let app;
-  let mockCache;
+  let app: Express;
+  let mockCache: {
+    keys: string[];
+    get: ReturnType<typeof vi.fn>;
+    create: ReturnType<typeof vi.fn>;
+    update: ReturnType<typeof vi.fn>;
+    remove: ReturnType<typeof vi.fn>;
+    clear: ReturnType<typeof vi.fn>;
+    cache: Map<string, unknown>;
+  };
 
   beforeEach(() => {
     // Mock cache with all required methods
@@ -22,7 +31,7 @@ describe("API Routes - Unit Tests", () => {
     // Create minimal app with just our routes
     app = express();
     app.use(express.json());
-    app.use("/api", createApiRoutes(mockCache));
+    app.use("/api", createApiRoutes(mockCache as unknown as Cache));
 
     // Silence console for tests
     console.error = vi.fn();
